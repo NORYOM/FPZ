@@ -13,7 +13,6 @@ class UI:
 
 	# scale
 	h, w = inputImg.shape[:2]
-	print(max(h, w))
 	scale = 600/max(h,w)
 	dims = (int(w * scale), int(h * scale))
 
