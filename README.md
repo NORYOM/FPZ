@@ -4,8 +4,7 @@ Python 3.7.4
 
 openCV 4.1.1
 
-install latest sklearn use following command:
-
+install latest sklearn use command:
 pip install -U scikit-learn
 
 
