@@ -11,21 +11,23 @@ class UI:
 	pic = ImageTk.PhotoImage(loadedImg)
 	inputImg = cv2.imread(imgName,cv2.IMREAD_COLOR)
 
-	# scale
+	# 缩放
 	h, w = inputImg.shape[:2]
 	scale = 600/max(h,w)
 	dims = (int(w * scale), int(h * scale))
 
-	# scale for tkinter canvas
+	# 缩放图片用于 tkinter 显示
 	resizedPic = loadedImg.resize((dims[0],dims[1]))
 	pic = ImageTk.PhotoImage(resizedPic)
-	# scale for opencv
+	# 缩放图片用于 opencv 处理
 	interpln = cv2.INTER_LINEAR if scale > 1.0 else cv2.INTER_AREA
 	inputImg = cv2.resize(inputImg, dims, interpolation=interpln)
 
 	colrs = ["orange","lightgreen"]
 	colr = colrs[0]
-	faceData = []
+	faceData = [] # 脸的位置尺寸
+	trainningData = [] # 灰度并缩放后的用于训练的脸
+	typeSet = [] # 脸类型, 1: 感兴趣; 0: 不感兴趣
 
 	def __init__(self):
 		self.cv.pack()
@@ -64,8 +66,8 @@ class UI:
 
 			l41 = self.cv.create_line(x+w,y+h, x+w-boadw,y+h, fill=colr)
 			l42 = self.cv.create_line(x+w,y+h, x+w,y+h-boadw, fill=colr)
-
-			self.faceData.append([face,l11,l12,l21,l22,l31,l32,l41,l42,0])
+			faceId = str(face[0]) + ":" + str(face[1]) + ":" + str(face[2]) + ":" + str(face[3])
+			self.faceData.append([face,l11,l12,l21,l22,l31,l32,l41,l42,0,False,faceId]) # face: 脸的尺寸位置; l11...l42: 脸的线框; 0: 鼠标点击次数; False: 是否被选中; faceId: 标记唯一的脸
 
 	def isInFace(self,mx,my,face):
 		x = face[0]
@@ -76,10 +78,24 @@ class UI:
 			return True
 		return False
 
+	def processedPic(self,face,inputImg): # 灰度化脸并缩放到 32*32
+		x = face[0]
+		y = face[1]
+		w = face[2]
+		h = face[3]
+		img = inputImg[y:y+h,x:x+w]
+		faceImg = img.copy()
+		grayFace = cv2.cvtColor(faceImg,cv2.COLOR_BGR2GRAY)
+		scaledFace = cv2.resize(grayFace,(32,32))
+		return scaledFace
+
 	def mouseDown(self,e):
 		for data in self.faceData:
+			trainPic = self.processedPic(data[0],self.inputImg)
+			trainningData.append(trainPic)
 			if self.isInFace(e.x,e.y,data[0]):
 				data[9] += 1
+				data[10] = not data[10]
 				colr = self.colrs[data[9]%2]
 				self.cv.itemconfig(data[1], fill=colr)
 				self.cv.itemconfig(data[2], fill=colr)
