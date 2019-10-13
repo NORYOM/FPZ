@@ -14,3 +14,6 @@ download all file then run as:
 python ui.py
 
 click frame of face(s) in picture to choose
+
+
+确保图片文件夹里只有图片文件，否则会报错！
