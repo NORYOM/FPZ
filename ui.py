@@ -1,4 +1,6 @@
 from tkinter import *
+import tkinter.filedialog
+import os
 from PIL import Image,ImageTk
 import faceDetector as fd
 import cv2
@@ -6,23 +8,16 @@ import cv2
 class UI:
 	win = Tk()
 	cv = Canvas(win,width=800,height=600,bg='gray')
-	imgName = 't1.jpg'
-	loadedImg = Image.open(imgName)
-	pic = ImageTk.PhotoImage(loadedImg)
-	inputImg = cv2.imread(imgName,cv2.IMREAD_COLOR)
 
-	# 缩放
-	h, w = inputImg.shape[:2]
-	scale = 600/max(h,w)
-	dims = (int(w * scale), int(h * scale))
+	imgPath = "" # 存放供选脸图片的文件夹路径
+	imgNames = [] # 存放文件夹内所有图片文件名
+	inputImg = None
+	picCount = 0
 
-	# 缩放图片用于 tkinter 显示
-	resizedPic = loadedImg.resize((dims[0],dims[1]))
-	pic = ImageTk.PhotoImage(resizedPic)
-	# 缩放图片用于 opencv 处理
-	interpln = cv2.INTER_LINEAR if scale > 1.0 else cv2.INTER_AREA
-	inputImg = cv2.resize(inputImg, dims, interpolation=interpln)
+	btnNextImg = None
+	btnPrevImg = None
 
+	pic = None
 	colrs = ["orange","lightgreen"]
 	colr = colrs[0]
 	faceData = [] # 脸的位置尺寸
@@ -30,14 +25,51 @@ class UI:
 	typeSet = [] # 脸类型, 1: 感兴趣; 0: 不感兴趣
 
 	def __init__(self):
-		self.cv.pack()
+		self.cv.bind("<Button-1>",self.mouseDownOnCanvas)
+
+		btnSelectFolder = Button(self.win, text="选择图片文件夹", command=self.btnSelFoldClick)
+		btnSelectFolder.grid(row=0,column=0,sticky="nw")
+		self.btnNextImg = Button(self.win, text="下一张", command=self.btnNextImgClick)
+		self.btnNextImg.grid(row=0,column=1,sticky="nw")
+		self.btnPrevImg = Button(self.win, text="上一张", command=self.btnPrevImgClick)
+		self.btnPrevImg.grid(row=0,column=2,sticky="nw")
+		self.win.rowconfigure(0, weight=1)
+		self.win.columnconfigure(2, weight=1)
+
+		self.btnNextImg['state']="disabled"
+		self.btnPrevImg['state']="disabled"
+
+	def loadImgs(self):
+		res = os.walk(self.imgPath)
+		for root,dirs,files in res:
+			for file in files:
+				self.imgNames.append(self.imgPath+"/"+file)
+
+	def showImgOnCanvas(self, imgName):
+		self.cv.grid(row=1,column=0,columnspan=3)
 		self.cv.delete(ALL)
+		loadedImg = Image.open(imgName)
+		pic = ImageTk.PhotoImage(loadedImg)
+		self.inputImg = cv2.imread(imgName,cv2.IMREAD_COLOR)
+
+		# 缩放
+		h, w = self.inputImg.shape[:2]
+		scale = 1
+		if h>600 or w>800:
+			scale = 600/max(h,w)
+		dims = (int(w * scale), int(h * scale))
+
+		# 缩放图片用于 tkinter 显示
+		resizedPic = loadedImg.resize((dims[0],dims[1]))
+		self.pic = ImageTk.PhotoImage(resizedPic)
+		# 缩放图片用于 opencv 处理
+		interpln = cv2.INTER_LINEAR if scale > 1.0 else cv2.INTER_AREA
+		self.inputImg = cv2.resize(self.inputImg, dims, interpolation=interpln)
 
 		self.drawPic()
 		faces = self.getFaces(self.inputImg)
 		self.drawFacePos(faces,self.colr)
 
-		self.cv.bind("<Button-1>",self.mouseDown)
 
 	def drawPic(self):
 		self.cv.create_image(0,0,anchor="nw",image=self.pic)
@@ -89,10 +121,10 @@ class UI:
 		scaledFace = cv2.resize(grayFace,(32,32))
 		return scaledFace
 
-	def mouseDown(self,e):
+	def mouseDownOnCanvas(self,e):
 		for data in self.faceData:
 			trainPic = self.processedPic(data[0],self.inputImg)
-			trainningData.append(trainPic)
+			self.trainningData.append(trainPic)
 			if self.isInFace(e.x,e.y,data[0]):
 				data[9] += 1
 				data[10] = not data[10]
@@ -108,6 +140,33 @@ class UI:
 
 	def run(self):
 		self.win.mainloop()
+
+	def btnSelFoldClick(self):
+		self.imgNames = []
+		self.imgPath = tkinter.filedialog.askdirectory()
+		self.picCount = 0
+		if len(self.imgPath)>0:
+			self.loadImgs()
+			self.btnNextImg['state']="active"
+			self.showImgOnCanvas(self.imgNames[self.picCount])
+
+	def btnNextImgClick(self):
+		self.picCount += 1
+		self.showImgOnCanvas(self.imgNames[self.picCount])
+		if self.picCount>=len(self.imgNames)-1:
+			self.btnNextImg['state']="disabled"
+			return
+		if self.picCount>0 and len(self.imgNames)>1:
+			self.btnPrevImg['state']="active"
+
+	def btnPrevImgClick(self):
+		self.picCount -= 1
+		self.showImgOnCanvas(self.imgNames[self.picCount])
+		if self.picCount<=0:
+			self.btnPrevImg['state']="disabled"
+			return
+		if self.picCount>0 and self.picCount<=len(self.imgNames)-1:
+			self.btnNextImg['state']="active"
 
 ui = UI()
 ui.run()
