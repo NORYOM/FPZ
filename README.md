@@ -16,4 +16,4 @@ python ui.py
 click frame of face(s) in picture to choose
 
 
-确保图片文件夹里只有图片文件，否则会报错！
+确保选择的图片文件夹里只有图片文件，否则会报错！
