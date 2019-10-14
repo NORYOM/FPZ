@@ -1,4 +1,7 @@
+import numpy as np
 from sklearn import svm
+from sklearn.decomposition import PCA
+from sklearn.externals import joblib
 
 class Classify:
 
@@ -18,8 +21,14 @@ class Classify:
 			self.y.append(t)
 
 	def train(self):
-		self.clsf.fit(X,y)
+		#### 待完成!!! self.X 需要降维处理，否则不能进行训练
+		#  1、尝试使用 svc = LinearSVC() 或者
+		#  2、先将 32*32 图形矩阵降维至 1*1024再分类
+		self.clsf.fit(self.X,self.y)
 
 	def chkType(self,targetData):
 		arr = self.predict([targetData])
 		return arr[0]
+
+	def saveModule(self):
+		joblib.dump(self.clsf,'./train.mdl')
