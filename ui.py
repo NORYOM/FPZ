@@ -4,10 +4,12 @@ import os
 from PIL import Image,ImageTk
 import faceDetector as fd
 import cv2
+from classify import Classify 
 
 class UI:
 	win = Tk()
 	cv = Canvas(win,width=800,height=600,bg='gray')
+	print("正在载入，请稍候。")
 
 	imgPath = "" # 存放供选脸图片的文件夹路径
 	imgNames = [] # 存放文件夹内所有图片文件名
@@ -33,7 +35,7 @@ class UI:
 		self.btnNextImg.grid(row=0,column=1,sticky="nw")
 		self.btnPrevImg = Button(self.win, text="上一张", command=self.btnPrevImgClick)
 		self.btnPrevImg.grid(row=0,column=2,sticky="nw")
-		self.btnTrainImg = Button(self.win, text="训练", command=self.btnSaveTrainDataClick)
+		self.btnTrainImg = Button(self.win, text="训练并保存", command=self.btnSaveTrainDataClick)
 		self.btnTrainImg.grid(row=0,column=3,sticky="nw")
 		self.win.rowconfigure(0, weight=1)
 		self.win.columnconfigure(3, weight=1)
@@ -211,6 +213,11 @@ class UI:
 				self.typeSet.append(1)
 			else:
 				self.typeSet.append(0)
+		clf = Classify()
+		clf.setTrainData(self.trainningData)
+		clf.setTypeData(self.typeSet)
+		clf.train()
+		clf.saveModule()
 
 ui = UI()
 ui.run()
