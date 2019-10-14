@@ -175,10 +175,10 @@ class UI:
 		self.win.mainloop()
 
 	def btnSelFoldClick(self):
-		self.imgNames = []
 		self.imgPath = tkinter.filedialog.askdirectory()
-		self.picCount = 0
 		if len(self.imgPath)>0:
+			self.imgNames = []
+			self.picCount = 0
 			self.faceData = [] # 重新选择文件夹就重置
 			self.loadImgs()
 			self.btnNextImg['state']="active"
