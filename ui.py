@@ -26,19 +26,25 @@ class UI:
 	trainningData = [] # 灰度并缩放后的用于训练的脸
 	typeSet = [] # 脸类型, 1: 感兴趣; 0: 不感兴趣
 
+	predImgPath = "" # 存放待推荐脸图片的文件夹路径
+
 	def __init__(self):
 		self.cv.bind("<Button-1>",self.mouseDownOnCanvas)
 
-		btnSelectFolder = Button(self.win, text="选择图片文件夹", command=self.btnSelFoldClick)
+		btnSelectFolder = Button(self.win, text="选择供训练的图片文件夹", command=self.btnSelFoldClick)
 		btnSelectFolder.grid(row=0,column=0,sticky="nw")
 		self.btnNextImg = Button(self.win, text="下一张", command=self.btnNextImgClick)
 		self.btnNextImg.grid(row=0,column=1,sticky="nw")
 		self.btnPrevImg = Button(self.win, text="上一张", command=self.btnPrevImgClick)
 		self.btnPrevImg.grid(row=0,column=2,sticky="nw")
-		self.btnTrainImg = Button(self.win, text="训练并保存", command=self.btnSaveTrainDataClick)
-		self.btnTrainImg.grid(row=0,column=3,sticky="nw")
+		btnTrainImg = Button(self.win, text="训练并保存", command=self.btnSaveTrainDataClick)
+		btnTrainImg.grid(row=0,column=3,sticky="nw")
+		btnPredFoldImg = Button(self.win, text="选择待推荐的图片文件夹", command=self.btnPredFoldClick)
+		btnPredFoldImg.grid(row=0,column=4,sticky="nw")
+		btnPredImg = Button(self.win, text="开始推荐", command=self.btnPredictClick)
+		btnPredImg.grid(row=0,column=5,sticky="nw")
 		self.win.rowconfigure(0, weight=1)
-		self.win.columnconfigure(3, weight=1)
+		self.win.columnconfigure(5, weight=1)
 
 		self.btnNextImg['state']="disabled"
 		self.btnPrevImg['state']="disabled"
@@ -49,19 +55,24 @@ class UI:
 			for file in files:
 				self.imgNames.append(self.imgPath+"/"+file)
 
+	# 缩放图片
+	def scaleImage(self,inputImg):
+		h, w = inputImg.shape[:2]
+		scale = 1
+		if h>600 or w>800:
+			scale = 600/max(h,w)
+		dims = (int(w * scale), int(h * scale))
+		return scale,dims
+
 	def showImgOnCanvas(self, imgName):
-		self.cv.grid(row=1,column=0,columnspan=4)
+		self.cv.grid(row=1,column=0,columnspan=6)
 		self.cv.delete(ALL)
 		loadedImg = Image.open(imgName)
 		pic = ImageTk.PhotoImage(loadedImg)
 		self.inputImg = cv2.imread(imgName,cv2.IMREAD_COLOR)
 
 		# 缩放
-		h, w = self.inputImg.shape[:2]
-		scale = 1
-		if h>600 or w>800:
-			scale = 600/max(h,w)
-		dims = (int(w * scale), int(h * scale))
+		scale,dims = self.scaleImage(self.inputImg)
 
 		# 缩放图片用于 tkinter 显示
 		resizedPic = loadedImg.resize((dims[0],dims[1]))
@@ -74,7 +85,6 @@ class UI:
 		faces = self.getFaces(self.inputImg)
 		self.drawFacePos(faces,self.colr)
 
-
 	def drawPic(self):
 		self.cv.create_image(0,0,anchor="nw",image=self.pic)
 
@@ -82,6 +92,7 @@ class UI:
 		faces = fd.detect_faces_dnn(inputImg)
 		return faces
 
+	# 绘制脸外框
 	def drawFacePos(self,faces,colr):
 		for face in faces:
 			x = face[0]
@@ -152,6 +163,7 @@ class UI:
 		scaledFace = cv2.resize(grayFace,(32,32))
 		return scaledFace
 
+	# 设置脸外框颜色
 	def setFaceSelect(self,face):
 		if face["select"]==True:
 			colr = self.colrs[1]
@@ -166,6 +178,7 @@ class UI:
 		self.cv.itemconfig(face["board"][6], fill=colr)
 		self.cv.itemconfig(face["board"][7], fill=colr)
 
+	# 选脸
 	def mouseDownOnCanvas(self,e):
 		for face in self.faceData:
 			# 加入 face["imgNo."]==self.picCount 是为了判断并排除不同图片里同一个坐标的不同的脸
@@ -176,6 +189,7 @@ class UI:
 	def run(self):
 		self.win.mainloop()
 
+	# 选择含有提供训练的图片的文件夹
 	def btnSelFoldClick(self):
 		self.imgPath = tkinter.filedialog.askdirectory()
 		if len(self.imgPath)>0:
@@ -186,6 +200,7 @@ class UI:
 			self.btnNextImg['state']="active"
 			self.showImgOnCanvas(self.imgNames[self.picCount])
 
+	# 后一张图
 	def btnNextImgClick(self):
 		self.picCount += 1
 		self.showImgOnCanvas(self.imgNames[self.picCount])
@@ -195,6 +210,7 @@ class UI:
 		if self.picCount>0 and len(self.imgNames)>1:
 			self.btnPrevImg['state']="active"
 
+	# 前一张图
 	def btnPrevImgClick(self):
 		self.picCount -= 1
 		self.showImgOnCanvas(self.imgNames[self.picCount])
@@ -204,7 +220,11 @@ class UI:
 		if self.picCount>0 and self.picCount<=len(self.imgNames)-1:
 			self.btnNextImg['state']="active"
 
+	# 训练并保存
 	def btnSaveTrainDataClick(self):
+		if len(self.faceData)<=1:
+			print("选脸至少需要 2 个以上。")
+			return
 		self.trainningData = [] # 清空训练数据
 		self.typeSet = [] # 清空类型数据
 		for face in self.faceData:
@@ -218,6 +238,62 @@ class UI:
 		clf.setTypeData(self.typeSet)
 		clf.train()
 		clf.saveModule()
+
+	# 选择含有等待推荐的图片的文件夹
+	def btnPredFoldClick(self):
+		self.predImgPath = tkinter.filedialog.askdirectory()
+
+	# 根据图片文件名从一张图片中找出所有脸的数据
+	def getFaceFromImg(self,imgName):
+		inputImg = cv2.imread(imgName,cv2.IMREAD_COLOR)
+
+		# 缩放
+		scale,dims = self.scaleImage(inputImg)
+		interpln = cv2.INTER_LINEAR if scale > 1.0 else cv2.INTER_AREA
+		inputImg = cv2.resize(inputImg, dims, interpolation=interpln)
+
+		# 找脸
+		faces = self.getFaces(inputImg)
+		if len(faces)==0:
+			return None
+		faceData = []
+		for face in faces:
+			picData = self.processedPic(face,inputImg)
+			faceData.append(picData)
+		return faceData
+
+	# 推荐
+	def btnPredictClick(self):
+		if len(self.predImgPath)==0:
+			print("没有选择待推荐的图片文件夹。")
+			return
+		if os.path.exists('./train.mdl')==False:
+			print("模型文件 train.mdl 不存在，需要重新训练。")
+			return
+		clf = Classify()
+		fileCnt = 0
+		goodPic = []
+		print("开始推荐")
+		if len(self.predImgPath)>0:
+			res = os.walk(self.predImgPath)
+			for root,dirs,files in res:
+				for file in files:
+					fileCnt += 1
+					print("%.2f%%" % (fileCnt*100/len(files)))
+					imgName = self.predImgPath+"/"+file
+					faces = self.getFaceFromImg(imgName)
+					if faces == None:
+						continue
+					res = clf.chkType(faces)
+					if len(res)>0:
+						for f in res:
+							if f==1:
+								goodPic.append(imgName)
+								break
+
+		print("推荐结束，共推荐%d个图片" % (len(goodPic)))
+		for p in goodPic:
+			print(p)
 
 ui = UI()
 ui.run()
