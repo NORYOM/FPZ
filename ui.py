@@ -95,6 +95,11 @@ class UI:
 	# 绘制脸外框
 	def drawFacePos(self,faces,colr):
 		for face in faces:
+			#### 把脸的范围超出原图的过滤调
+			h,w = self.inputImg.shape[:2]
+			if face[0]+face[2]>w or face[1]+face[3]>h:
+				continue
+			#############################
 			x = face[0]
 			y = face[1]
 			w = face[2]
@@ -258,6 +263,11 @@ class UI:
 			return None
 		faceData = []
 		for face in faces:
+			#### 把脸的范围超出原图的过滤调
+			h,w = inputImg.shape[:2]
+			if face[0]+face[2]>w or face[1]+face[3]>h:
+				continue
+			#############################
 			picData = self.processedPic(face,inputImg)
 			faceData.append(picData)
 		return faceData
