@@ -31,8 +31,7 @@ class Classify:
 				faceCnt += 1
 				print("%.2f%%" % (faceCnt*100/len(faceData)))
 			dim2X = self.tsne.fit_transform(x)
-			npArr = np.array(dim2X)
-			newX.append(npArr.mean(axis=0))
+			newX.append(dim2X.mean(axis=0))
 		return newX
 
 	def train(self):
