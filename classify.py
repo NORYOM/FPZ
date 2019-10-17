@@ -23,16 +23,16 @@ class Classify:
 			self.y.append(t)
 
 	# 降维处理
-	def dimentionTransform(self,faceData):
+	def dimentionTransform(self,faceData,isTrain=False):
 		newX = []
+		faceCnt = 0
 		for x in faceData:
+			if isTrain==True: # 训练时显示进度，推荐时不需要
+				faceCnt += 1
+				print("%.2f%%" % (faceCnt*100/len(faceData)))
 			dim2X = self.tsne.fit_transform(x)
-			sum0 = 0
-			sum1 = 0
-			for nx in dim2X:
-				sum0 += nx[0]
-				sum1 += nx[1]
-			newX.append([sum0/len(dim2X),sum1/len(dim2X)])
+			npArr = np.array(dim2X)
+			newX.append(npArr.mean(axis=0))
 		return newX
 
 	def train(self):
@@ -42,7 +42,7 @@ class Classify:
 		print("开始训练")
 
 		# 先将 32*32 图形矩阵降维至 2*32，然后计算两列的平均值之后再分类
-		newX = self.dimentionTransform(self.X)
+		newX = self.dimentionTransform(self.X,True)
 		self.clsf.fit(newX,self.y)
 
 	def chkType(self,faceData):
