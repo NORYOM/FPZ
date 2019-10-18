@@ -26,7 +26,7 @@ class UI:
 	trainningData = [] # 灰度并缩放后的用于训练的脸
 	typeSet = [] # 脸类型, 1: 感兴趣; 0: 不感兴趣
 
-	predImgPath = "" # 存放待推荐脸图片的文件夹路径
+	predImgPath = "" # 存放待匹配脸图片的文件夹路径
 
 	def __init__(self):
 		self.cv.bind("<Button-1>",self.mouseDownOnCanvas)
@@ -39,9 +39,9 @@ class UI:
 		self.btnPrevImg.grid(row=0,column=2,sticky="nw")
 		btnTrainImg = Button(self.win, text="训练并保存", command=self.btnSaveTrainDataClick)
 		btnTrainImg.grid(row=0,column=3,sticky="nw")
-		btnPredFoldImg = Button(self.win, text="选择待推荐的图片文件夹", command=self.btnPredFoldClick)
+		btnPredFoldImg = Button(self.win, text="选择待匹配的图片文件夹", command=self.btnPredFoldClick)
 		btnPredFoldImg.grid(row=0,column=4,sticky="nw")
-		btnPredImg = Button(self.win, text="开始推荐", command=self.btnPredictClick)
+		btnPredImg = Button(self.win, text="开始匹配", command=self.btnPredictClick)
 		btnPredImg.grid(row=0,column=5,sticky="nw")
 		self.win.rowconfigure(0, weight=1)
 		self.win.columnconfigure(5, weight=1)
@@ -244,7 +244,7 @@ class UI:
 		clf.train()
 		clf.saveModule()
 
-	# 选择含有等待推荐的图片的文件夹
+	# 选择含有等待匹配的图片的文件夹
 	def btnPredFoldClick(self):
 		self.predImgPath = tkinter.filedialog.askdirectory()
 
@@ -272,10 +272,10 @@ class UI:
 			faceData.append(picData)
 		return faceData
 
-	# 推荐
+	# 匹配
 	def btnPredictClick(self):
 		if len(self.predImgPath)==0:
-			print("没有选择待推荐的图片文件夹。")
+			print("没有选择待匹配的图片文件夹。")
 			return
 		if os.path.exists('./train.mdl')==False:
 			print("模型文件 train.mdl 不存在，需要重新训练。")
@@ -283,7 +283,7 @@ class UI:
 		clf = Classify()
 		fileCnt = 0
 		goodPic = []
-		print("开始推荐")
+		print("开始匹配")
 		if len(self.predImgPath)>0:
 			res = os.walk(self.predImgPath)
 			for root,dirs,files in res:
@@ -301,7 +301,7 @@ class UI:
 								goodPic.append(imgName)
 								break
 
-		print("推荐结束，共推荐%d个图片" % (len(goodPic)))
+		print("匹配结束，找到%d个相似图片" % (len(goodPic)))
 		for p in goodPic:
 			print(p)
 
