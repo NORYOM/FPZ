@@ -53,7 +53,8 @@ class Classify:
 		clsf = joblib.load('./train.mdl')
 		newFaces = self.dimentionTransform(faceData)
 		arr = clsf.predict(newFaces)
-		return arr
+		score = clsf.predict_proba(newFaces) # 只有当使用决策树时才用，其他方式需要修改返回的 score 为 None
+		return arr,score
 
 	def saveModule(self):
 		print("开始保存模型")
