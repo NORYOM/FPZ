@@ -1,7 +1,9 @@
 import numpy as np
-from sklearn import svm
+# from sklearn import svm
 from sklearn import manifold
 from sklearn.externals import joblib
+from sklearn import tree
+# from sklearn import neighbors
 
 class Classify:
 
@@ -11,7 +13,9 @@ class Classify:
 	tsne = None
 
 	def  __init__(self):
-		self.clsf = svm.SVC(gamma='scale')
+		# self.clsf = svm.SVC(gamma='scale')
+		self.clsf = tree.DecisionTreeClassifier()
+		# self.clsf = neighbors.KNeighborsClassifier(30, weights='distance')
 		self.tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
 
 	def setTrainData(self,trainData):
