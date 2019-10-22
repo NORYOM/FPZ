@@ -62,6 +62,7 @@ for res in resLst_hasimoto:
 print("Hasimoto",cnt_hasimoto)
 print("--------------------")
 
+# 如果已经训练过了，有模型存在了，可以注释掉下面训练部分，否则第一次需要训练
 # clf.setTrainData(trainningData)
 # clf.setTypeData(typeSet)
 
