@@ -294,7 +294,7 @@ class UI:
 					faces = self.getFaceFromImg(imgName)
 					if faces == None:
 						continue
-					res = clf.chkType(faces)
+					res,_ = clf.chkType(faces)
 					if len(res)>0:
 						for f in res:
 							if f==1:
