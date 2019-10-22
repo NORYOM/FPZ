@@ -97,7 +97,7 @@ class UI:
 		for face in faces:
 			#### 把脸的范围超出原图的过滤调
 			h,w = self.inputImg.shape[:2]
-			if face[0]+face[2]>w or face[1]+face[3]>h:
+			if (face[0]+face[2]>w) or (face[1]+face[3]>h) or face[0]<0 or face[1]<0:
 				continue
 			#############################
 			x = face[0]
@@ -265,7 +265,7 @@ class UI:
 		for face in faces:
 			#### 把脸的范围超出原图的过滤调
 			h,w = inputImg.shape[:2]
-			if face[0]+face[2]>w or face[1]+face[3]>h:
+			if (face[0]+face[2]>w) or (face[1]+face[3]>h) or face[0]<0 or face[1]<0:
 				continue
 			#############################
 			picData = self.processedPic(face,inputImg)
