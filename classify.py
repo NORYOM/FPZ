@@ -47,7 +47,8 @@ class Classify:
 		# 先将 32*32 图形矩阵降维至 2*32，然后计算两列的平均值之后再分类
 		newX = self.dimentionTransform(self.X,True)
 		self.clsf.fit(newX,self.y)
-		print("训练完成，共 %d 个正例 %d 个反例。" % (self.y.count(1), self.y.count(0)))
+		# print("训练完成，共 %d 个正例 %d 个反例。" % (self.y.count(1), self.y.count(0)))
+		print("训练完成")
 
 	def chkType(self,faceData):
 		clsf = joblib.load('./train.mdl')
