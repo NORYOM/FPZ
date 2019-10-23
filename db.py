@@ -63,15 +63,15 @@ chk_hasimoto,cnt_hasimoto = traninningData(sql_hasimoto,2)
 # chk_tsubasa,cnt_tsubasa = traninningData(sql_tsubasa,4)
 # chk_yuamikami,cnt_yuamikami = traninningData(sql_yuamikami,5)
 
-clf.setTrainData(trainningData)
-clf.setTypeData(typeSet)
+# clf.setTrainData(trainningData)
+# clf.setTypeData(typeSet)
 
-clf.train()
-clf.saveModule()
+# clf.train()
+# clf.saveModule()
 
 print("Check predict")
 
-def checkPredict(name,chk_Data):
+def checkPredict(name,chk_Data,pred):
 	res_true = 0
 	res_false = 0
 	cnt = 0
@@ -81,18 +81,18 @@ def checkPredict(name,chk_Data):
 		faces = []
 		faces.append(face)
 		res,score = clf.chkType(faces)
-		if score[0][0]<0.8:
+		if score[0][pred]<0.5:
 			res_false += 1
 		else:
 			res_true += 1
 	return res_true,res_false
 
-res_true_aizawa,res_false_aizawa = checkPredict("Aizawa",chk_aizawa)
-res_true_asuka,res_false_asuka = checkPredict("Asuka",chk_asuka)
-res_true_hasimoto,res_false_hasimoto = checkPredict("Hasimoto",chk_hasimoto)
-# res_true_takahasi,res_false_takahasi = checkPredict("Takahasi",chk_takahasi)
-# res_true_tsubasa,res_false_tsubasa = checkPredict("Tsubasa",chk_tsubasa)
-# res_true_yuamikami,res_false_yuamikami = checkPredict("Yuamikami",chk_yuamikami)
+res_true_aizawa,res_false_aizawa = checkPredict("Aizawa",chk_aizawa,0)
+res_true_asuka,res_false_asuka = checkPredict("Asuka",chk_asuka,1)
+res_true_hasimoto,res_false_hasimoto = checkPredict("Hasimoto",chk_hasimoto,2)
+# res_true_takahasi,res_false_takahasi = checkPredict("Takahasi",chk_takahasi,3)
+# res_true_tsubasa,res_false_tsubasa = checkPredict("Tsubasa",chk_tsubasa,4)
+# res_true_yuamikami,res_false_yuamikami = checkPredict("Yuamikami",chk_yuamikami,5)
 
 print("--------------------")
 print("Aizawa",cnt_aizawa)
