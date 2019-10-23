@@ -166,7 +166,9 @@ class UI:
 		faceImg = img.copy()
 		grayFace = cv2.cvtColor(faceImg,cv2.COLOR_BGR2GRAY)
 		scaledFace = cv2.resize(grayFace,(32,32))
-		return scaledFace
+		h, w = scaledFace.shape[:2]
+		vec = scaledFace.reshape(w * h)
+		return vec
 
 	# 设置脸外框颜色
 	def setFaceSelect(self,face):
