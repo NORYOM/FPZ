@@ -43,7 +43,7 @@ cnt_yuamikami  = 0
 
 print("Create Trainning Set")
 print("--------------------")
-def traninningData(sql):
+def traninningData(sql,type):
 	global trainningData,typeSet
 	resLst = c.execute(sql)
 	chk = []
@@ -52,22 +52,22 @@ def traninningData(sql):
 		scaledFace = transformFace(res[1])
 		trainningData.append(scaledFace)
 		chk.append(scaledFace)
-		typeSet.append(0)
+		typeSet.append(type)
 		cnt += 1
 	return chk,cnt
 
-chk_aizawa,cnt_aizawa = traninningData(sql_aizawa)
-chk_asuka,cnt_asuka = traninningData(sql_asuka)
-chk_hasimoto,cnt_hasimoto = traninningData(sql_hasimoto)
-# chk_takahasi,cnt_takahasi = traninningData(sql_takahasi)
-# chk_tsubasa,cnt_tsubasa = traninningData(sql_tsubasa)
-# chk_yuamikami,cnt_yuamikami = traninningData(sql_yuamikami)
+chk_aizawa,cnt_aizawa = traninningData(sql_aizawa,0)
+chk_asuka,cnt_asuka = traninningData(sql_asuka,1)
+chk_hasimoto,cnt_hasimoto = traninningData(sql_hasimoto,2)
+# chk_takahasi,cnt_takahasi = traninningData(sql_takahasi,3)
+# chk_tsubasa,cnt_tsubasa = traninningData(sql_tsubasa,4)
+# chk_yuamikami,cnt_yuamikami = traninningData(sql_yuamikami,5)
 
-# clf.setTrainData(trainningData)
-# clf.setTypeData(typeSet)
+clf.setTrainData(trainningData)
+clf.setTypeData(typeSet)
 
-# clf.train()
-# clf.saveModule()
+clf.train()
+clf.saveModule()
 
 print("Check predict")
 
